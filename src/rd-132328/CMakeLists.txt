@@ -1,0 +1,41 @@
+project(rd-132328)
+
+add_executable(rd-132328
+	RubyDung.c
+	Player.c 
+	Player.h
+	phys/AABB.c
+	phys/AABB.h
+	level/Chunk.c
+	level/Chunk.h
+	level/Frustum.c
+	level/Frustum.h
+	level/Level.c
+	level/Level.h
+	level/LevelRenderer.c
+	level/LevelRenderer.h
+	level/Tesselator.c
+	level/Tesselator.h
+	level/Tile.c
+	level/Tile.h
+	HitResult.c
+	HitResult.h
+	Textures.c
+	Textures.h
+	Timer.c
+	Timer.h
+	Util.c 
+	Util.h
+	Entity.c
+	Entity.h
+    character/Cube.c
+	character/Cube.h
+    character/Polygon.c
+	character/Polygon.h
+	character/Vec3.c
+	character/Vec3.h
+	character/Vertex.c
+	character/Vertex.h
+	character/Zombie.c
+	character/Zombie.h
+)

@@ -1,0 +1,13 @@
+.DS_Store
+
+build/
+out/
+lib/SDL/
+.vs/
+.vscode/
+.cache/
+*.user
+CMakeSettings.json
+CMakePresets.json
+launch.vs.json
+resources/
