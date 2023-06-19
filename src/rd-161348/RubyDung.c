@@ -166,9 +166,7 @@ void pick(float a) {
     }
 
     if (hitNameCount > 0) {
-        glDisable(GL_ALPHA_TEST);
         hitresult_create(&hitResult, names[0], names[1], names[2], names[3], names[4]);
-        glEnable(GL_ALPHA_TEST);
         isHitNull = 0;
     } else {
         isHitNull = 1;
@@ -266,7 +264,9 @@ void render(SDL_Window* window) {
     glDisable(GL_FOG);
 
     if (!isHitNull) {
+        glDisable(GL_ALPHA_TEST);
         levelrenderer_renderHit(&level.renderer, &hitResult);
+        glEnable(GL_ALPHA_TEST);
     }
 
     drawGui();
