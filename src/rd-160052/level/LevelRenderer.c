@@ -62,7 +62,7 @@ void levelrenderer_getAllDirtyChunks(ChunkArray* dirty, LevelRenderer* renderer)
         Chunk* chunk = &renderer->chunks[i];
 
         if (chunk->dirty) {
-            dirty->arr[dirty->size] = *chunk;
+            dirty->arr[dirty->size] = chunk;
             dirty->size++;
         }
     }
@@ -110,10 +110,10 @@ void levelrenderer_updateDirtyChunks(Level* level, Player* player) {
     levelrenderer_getAllDirtyChunks(&dirty, &level->renderer);
 
     if (dirty.size > 0) {
-        qsort(dirty.arr, dirty.size, sizeof(Chunk), levelrenderer_dirtyChunkSorter);
+        qsort(dirty.arr, dirty.size, sizeof(Chunk*), levelrenderer_dirtyChunkSorter);
 
         for (int i = 0; i < 8 && i < dirty.size; i++) {
-            chunk_rebuild(level, &dirty.arr[i]);
+            chunk_rebuild(level, dirty.arr[i]);
         }
     }
 }

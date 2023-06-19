@@ -23,7 +23,7 @@ typedef struct Chunk {
 } Chunk;
 
 typedef struct ChunkArray {
-    Chunk arr[1024];
+    Chunk* arr[1024];
     int size;
 } ChunkArray;
 
