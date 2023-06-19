@@ -181,7 +181,7 @@ void drawGui() {
     glClear(GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0, (double)screenWidth, (double)screenHeight, 0.0D, 100.0D, 300.0D);
+    glOrtho(0.0, (double)screenWidth, (double)screenHeight, 0.0, 100.0, 300.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0F, 0.0F, -200.0F);
