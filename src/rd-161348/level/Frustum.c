@@ -83,7 +83,7 @@ int frustum_visible(float x1, float y1, float z1, float x2, float y2, float z2) 
 
 int frustum_visibleAABB(AABB* aabb) {
     if (aabb->isNull) {
-        return 0;
+        return 1;
     }
 
     return frustum_visible(aabb->x0, aabb->y0, aabb->z0, aabb->x1, aabb->y1, aabb->z1);
