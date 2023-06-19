@@ -37,7 +37,7 @@ void tile_init() {
 
 int tile_getTexture(Tile *tile, int face) {
     if (tile->id == 2) {
-        grasstile_getTexture(face);
+        return grasstile_getTexture(face);
     } else {
         return tile->tex;
     }
