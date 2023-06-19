@@ -25,6 +25,11 @@ void zombie_tick(Zombie* zombie) {
     zombie->entity.zo = zombie->entity.z;
     float xa = 0.0F;
     float ya = 0.0F;
+
+    if (zombie->entity.y < -100.0F) {
+        zombie->entity.removed = 1;
+    }
+
     zombie->rot += zombie->rotA;
     zombie->rotA = (float)((double)zombie->rotA * 0.99);
     zombie->rotA = (float)((double)zombie->rotA + (frand - frand) * frand * frand * (double)0.08F);
