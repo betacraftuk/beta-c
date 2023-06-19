@@ -26,7 +26,7 @@ void tile_init() {
     tile_create(&tile_air, 0, -1, 1);
     tile_create(&tile_rock, 1, 1, 0);
     tile_create(&tile_rock, 1, 1, 0);
-    tile_create(&tile_grass, 2, 0, 0);
+    tile_create(&tile_grass, 2, 3, 0);
     tile_create(&tile_dirt, 3, 2, 0);
     tile_create(&tile_stoneBrick, 4, 16, 0);
     tile_create(&tile_wood, 5, 4, 0);
@@ -34,7 +34,7 @@ void tile_init() {
 
 int tile_getTexture(Tile *tile, int face) {
     if (tile->id == 2) {
-        grasstile_getTexture(face);
+        return grasstile_getTexture(face);
     } else {
         return tile->tex;
     }
