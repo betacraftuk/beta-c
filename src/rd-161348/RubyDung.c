@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 #include <SDL2/SDL.h>
 #include <math.h>
 #ifdef __APPLE__
@@ -59,6 +60,8 @@ void init() {
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5F);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
@@ -120,15 +123,6 @@ void setupCamera(float a) {
     moveCameraToPlayer(a);
 }
 
-void setupOrthoCamera() {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0, (double)width, (double)height, 0.0, 100.0, 300.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0.0F, 0.0F, -200.0F);
-}
-
 void setupPickCamera(float a, double x, double y) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -172,7 +166,9 @@ void pick(float a) {
     }
 
     if (hitNameCount > 0) {
+        glDisable(GL_ALPHA_TEST);
         hitresult_create(&hitResult, names[0], names[1], names[2], names[3], names[4]);
+        glEnable(GL_ALPHA_TEST);
         isHitNull = 0;
     } else {
         isHitNull = 1;
@@ -180,14 +176,22 @@ void pick(float a) {
 }
 
 void drawGui() {
+    int screenWidth = width * 240 / height;
+    int screenHeight = height * 240 / height;
     glClear(GL_DEPTH_BUFFER_BIT);
-    setupOrthoCamera();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0, (double)screenWidth, (double)screenHeight, 0.0D, 100.0D, 300.0D);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(0.0F, 0.0F, -200.0F);
     glPushMatrix();
-    glTranslatef((float)(width - 48), 48.0F, 0.0F);
-    glScalef(48.0F, 48.0F, 48.0F);
+    glTranslatef((float)(screenWidth - 16), 16.0F, 0.0F);
+    glScalef(16.0F, 16.0F, 16.0F);
     glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
     glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-    glTranslatef(1.5F, -0.5F, -0.5F);
+    glTranslatef(-1.5F, 0.5F, -0.5F);
+    glScalef(-1.0F, -1.0F, 1.0F);
     glBindTexture(GL_TEXTURE_2D, textures_load("terrain.png", 9728));
     glEnable(GL_TEXTURE_2D);
     tesselator_init();
@@ -195,18 +199,18 @@ void drawGui() {
     tesselator_flush();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
-    int wc = width / 2;
-    int hc = height / 2;
+    int wc = screenWidth / 2;
+    int hc = screenHeight / 2;
     glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     tesselator_init();
-    tesselator_vertex(wc + 1, hc - 8, 0.0F);
-    tesselator_vertex(wc - 0, hc - 8, 0.0F);
-    tesselator_vertex(wc - 0, hc + 9, 0.0F);
-    tesselator_vertex(wc + 1, hc + 9, 0.0F);
-    tesselator_vertex(wc + 9, hc - 0, 0.0F);
-    tesselator_vertex(wc - 8, hc - 0, 0.0F);
-    tesselator_vertex(wc - 8, hc + 1, 0.0F);
-    tesselator_vertex(wc + 9, hc + 1, 0.0F);
+    tesselator_vertex(wc + 1, hc - 4, 0.0F);
+    tesselator_vertex(wc - 0, hc - 4, 0.0F);
+    tesselator_vertex(wc - 0, hc + 5, 0.0F);
+    tesselator_vertex(wc + 1, hc + 5, 0.0F);
+    tesselator_vertex(wc + 5, hc - 0, 0.0F);
+    tesselator_vertex(wc - 4, hc - 0, 0.0F);
+    tesselator_vertex(wc - 4, hc + 1, 0.0F);
+    tesselator_vertex(wc + 5, hc + 1, 0.0F);
     tesselator_flush();
 }
 
@@ -281,10 +285,7 @@ int main() {
         exit(0);
     }
 
-    SDL_DisplayMode dm;
-    SDL_GetCurrentDisplayMode(0, &dm);
-
-    SDL_WindowFlags flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN;
+    SDL_WindowFlags flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
     SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
@@ -356,6 +357,9 @@ int main() {
                     break;
                 case SDLK_4:
                     paintTexture = 5;
+                    break;
+                case SDLK_6:
+                    paintTexture = 6;
                     break;
                 case SDLK_g:
                     spawnZombie();

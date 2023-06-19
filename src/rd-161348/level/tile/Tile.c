@@ -1,6 +1,7 @@
 #include "Tile.h"
 
 #include "GrassTile.h"
+#include "Bush.h"
 #include <stdlib.h>
 
 Tile tile_tiles[256];
@@ -10,6 +11,7 @@ Tile tile_grass;
 Tile tile_dirt;
 Tile tile_stoneBrick;
 Tile tile_wood;
+Tile tile_bush;
 
 int tile_getTexture(Tile* tile, int face);
 int tile_shouldRenderFace(Level* level, int x, int y, int z, int layer);
@@ -30,6 +32,7 @@ void tile_init() {
     tile_create(&tile_dirt, 3, 2, 0);
     tile_create(&tile_stoneBrick, 4, 16, 0);
     tile_create(&tile_wood, 5, 4, 0);
+    tile_create(&tile_bush, 6, 15, 0);
 }
 
 int tile_getTexture(Tile *tile, int face) {
@@ -41,6 +44,11 @@ int tile_getTexture(Tile *tile, int face) {
 }
 
 void tile_render(Tile* tile, Level* level, int layer, int x, int y, int z) {
+    if (tile->id == 6) {
+        bush_render(level, layer, x, y, z);
+        return;
+    }
+
     float c1 = 1.0F;
     float c2 = 0.8F;
     float c3 = 0.6F;
@@ -188,13 +196,35 @@ void tile_renderFaceNoTexture(Tile* tile, int x, int y, int z, int face) {
 
 }
 
-void tile_getAABB(AABB* source, int x, int y, int z) {
+void tile_getAABB(Tile* tile, AABB* source, int x, int y, int z) {
+    if (tile->id == 6) {
+        source->isNull = 1;
+    }
+
     aabb_create(source, x, y, z, x + 1, y + 1, z + 1);
+}
+
+int tile_blocksLight(Tile* tile) {
+    if (tile->id == 6) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int tile_isSolid(Tile* tile) {
+    if (tile->id == 6) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 void tile_tick(Tile* tile, Level* level, int x, int y, int z) {
     if (tile->id == 2) {
         grasstile_tick(level, x, y, z);
+    } else if (tile->id == 6) {
+        bush_tick(level, x, y, z);
     }
 }
 
