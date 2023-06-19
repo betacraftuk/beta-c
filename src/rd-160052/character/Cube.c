@@ -12,6 +12,12 @@ void cube_compile(Cube* cube);
 void cube_create(Cube* cube, int xTexOffs, int yTexOffs) {
     cube->compiled = 0;
     cube->list = 0;
+    cube->x = 0;
+	cube->y = 0;
+	cube->z = 0;
+	cube->xRot = 0;
+	cube->yRot = 0;
+	cube->zRot = 0;
 
     cube_setTextOffs(cube, xTexOffs, yTexOffs);
 }

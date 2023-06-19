@@ -12,6 +12,17 @@ void entity_create(Entity* entity, Level* level) {
     entity->heightOffset = 0.0;
     entity->bbWidth = 0.6f;
     entity->bbHeight = 1.8f;
+    entity->xo = 0.0;
+    entity->yo = 0.0;
+    entity->zo = 0.0;
+    entity->x = 0.0;
+    entity->y = 0.0;
+    entity->z = 0.0;
+    entity->xd = 0.0;
+    entity->yd = 0.0;
+    entity->zd = 0.0;
+    entity->yRot = 0.0;
+    entity->xRot = 0.0;
     entity_resetPos(entity);
 }
 
@@ -113,8 +124,8 @@ void entity_moveRelative(Entity* entity, float xa, float za, float speed) {
         dist = speed / (float)sqrt((double)dist);
         xa *= dist;
         za *= dist;
-        float sinNew = (float)sin((double)entity->yRot * (double)M_PI / 180.0);
-        float cosNew = (float)cos((double)entity->yRot * (double)M_PI / 180.0);
+        float sinNew = (float)sin((double)entity->yRot * M_PI / 180.0);
+        float cosNew = (float)cos((double)entity->yRot * M_PI / 180.0);
         entity->xd += xa * cosNew - za * sinNew;
         entity->zd += za * cosNew + xa * sinNew;
     }
