@@ -15,6 +15,7 @@ void zombie_create(Zombie* zombie, Level* level, float x, float y, float z) {
     entity_create(&zombie->entity, level);
     entity_setPos(&zombie->entity, x, y, z);
     zombie->timeOffs = (float)frand * 1239813.0F;
+    zombie->rotA = (float)(frand + 1.0) * 0.01F;
     zombie->rot = (float)(frand * M_PI * 2.0);
     zombie->speed = 1.0F;
 }
