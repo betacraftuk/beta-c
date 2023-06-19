@@ -199,6 +199,7 @@ void tile_renderFaceNoTexture(Tile* tile, int x, int y, int z, int face) {
 void tile_getAABB(Tile* tile, AABB* source, int x, int y, int z) {
     if (tile->id == 6) {
         source->isNull = 1;
+        return;
     }
 
     aabb_create(source, x, y, z, x + 1, y + 1, z + 1);
@@ -207,17 +208,17 @@ void tile_getAABB(Tile* tile, AABB* source, int x, int y, int z) {
 int tile_blocksLight(Tile* tile) {
     if (tile->id == 6) {
         return 0;
-    } else {
-        return 1;
     }
+
+    return 1;
 }
 
 int tile_isSolid(Tile* tile) {
     if (tile->id == 6) {
         return 0;
-    } else {
-        return 1;
     }
+
+    return 1;
 }
 
 void tile_tick(Tile* tile, Level* level, int x, int y, int z) {
