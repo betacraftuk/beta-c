@@ -4,6 +4,6 @@
 #include "../Level.h"
 
 int grasstile_getTexture(int face);
-void grasstile_tick(Level* level, int x, int y, int z); //, Random random) {
+void grasstile_tick(Level* level, int x, int y, int z);
 
 #endif

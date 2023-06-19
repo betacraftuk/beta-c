@@ -7,14 +7,11 @@ int grasstile_getTexture(int face) {
     return face == 1 ? 0 : (face == 0 ? 2 : 3);
 }
 
-void grasstile_tick(Level* level, int x, int y, int z) {//, Random random) {
+void grasstile_tick(Level* level, int x, int y, int z) {
     if (!level_isLit(level, x, y, z)) {
         level_setTile(level, x, y, z, tile_dirt.id);
     } else {
         for (int i = 0; i < 4; ++i) {
-            //int xt = x + random.nextInt(3) - 1;
-            //int yt = y + random.nextInt(5) - 3;
-            //int zt = z + random.nextInt(3) - 1;
             int xt = x + rand() % 3 - 1;
             int yt = y + rand() % 5 - 3;
             int zt = z + rand() % 3 - 1;

@@ -66,7 +66,7 @@ void tesselator_init() {
 }
 
 void tesselator_tex(float u, float v) {
-    if(!tesselator_instance.hasTexture) {
+    if (!tesselator_instance.hasTexture) {
         tesselator_instance.len += 2;
     }
 
@@ -76,7 +76,7 @@ void tesselator_tex(float u, float v) {
 }
 
 void tesselator_color(float r, float g, float b) {
-    if(!tesselator_instance.hasColor) {
+    if (!tesselator_instance.hasColor) {
         tesselator_instance.len += 3;
     }
 
@@ -108,7 +108,7 @@ void tesselator_vertex(float x, float y, float z) {
     tesselator_instance.buffer[tesselator_instance.p++] = z;
 
     tesselator_instance.vertices++;
-    if (tesselator_instance.p >= 524288 - tesselator_instance.len) {
+    if (tesselator_instance.vertices % 4 == 0 && tesselator_instance.p >= 524288 - tesselator_instance.len * 4) {
         tesselator_flush();
     }
 }
