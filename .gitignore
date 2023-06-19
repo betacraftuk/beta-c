@@ -10,4 +10,3 @@ lib/SDL/
 CMakeSettings.json
 CMakePresets.json
 launch.vs.json
-resources/
