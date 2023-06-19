@@ -376,6 +376,13 @@ int main() {
             case SDLK_SPACE:
                 player.keys.isSpace = event.type == SDL_KEYDOWN;
                 break;
+            default:
+                break;
+            }
+        }
+        
+        if (event.type == SDL_KEYDOWN) {
+            switch (event.key.keysym.sym) {
             case SDLK_r:
                 entity_resetPos(&player.entity);
                 break;
