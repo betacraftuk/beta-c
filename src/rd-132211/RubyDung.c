@@ -120,52 +120,8 @@ void pick(float a) {
     }
 }
 
-void render(SDL_Event* e, SDL_Window* window) {
-    if (e->type == SDL_MOUSEMOTION) {
-        turnPlayer(&player, e->motion.xrel, -e->motion.yrel);
-    }
-
+void render(SDL_Window* window) {
     pick(timer.a);
-
-    if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_RIGHT && !isHitNull) {
-        level_setTile(&level, hitResult.x, hitResult.y, hitResult.z, 0);
-    }
-
-    if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_LEFT && !isHitNull) {
-        int x = hitResult.x;
-        int y = hitResult.y;
-        int z = hitResult.z;
-
-        if (hitResult.f == 0) {
-            y--;
-        }
-
-        if (hitResult.f == 1) {
-             y++;
-        }
-
-        if (hitResult.f == 2) {
-             z--;
-        }
-
-        if (hitResult.f == 3) {
-             z++;
-        }
-
-        if (hitResult.f == 4) {
-             x--;
-        }
-
-        if (hitResult.f == 5) {
-             x++;
-        }
-
-        level_setTile(&level, x, y, z, 1);
-    }
-
-    if ((e->type == SDL_KEYDOWN && e->key.keysym.sym == SDLK_RETURN)) {
-        level_save(&level);
-    }
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     setupCamera(timer.a);
@@ -210,40 +166,87 @@ int main() {
     uint64_t lastTime = util_getTimeInMs();
     int frames = 0;
 
-    while (1) {
+    int die = 0;
+
+    while (!die) {
         SDL_Event event;
-        SDL_PollEvent(&event);
 
-        if ((event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) || event.type == SDL_QUIT)
-            break;
+        while (SDL_PollEvent(&event)) {
+            if ((event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) || event.type == SDL_QUIT)
+                die = 1;
 
-        if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-            switch (event.key.keysym.sym)
-            {
-            case SDLK_UP:
-            case SDLK_w:
-                player.keys.isW = event.type == SDL_KEYDOWN;
-                break;
-            case SDLK_LEFT:
-            case SDLK_a:
-                player.keys.isA = event.type == SDL_KEYDOWN;
-                break;
-            case SDLK_DOWN:
-            case SDLK_s:
-                player.keys.isS = event.type == SDL_KEYDOWN;
-                break;
-            case SDLK_RIGHT:
-            case SDLK_d:
-                player.keys.isD = event.type == SDL_KEYDOWN;
-                break;
-            case SDLK_SPACE:
-                player.keys.isSpace = event.type == SDL_KEYDOWN;
-                break;
-            case SDLK_r:
-                resetPos(&player);
-                break;
-            default:
-                break;
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_UP:
+                case SDLK_w:
+                    player.keys.isW = event.type == SDL_KEYDOWN;
+                    break;
+                case SDLK_LEFT:
+                case SDLK_a:
+                    player.keys.isA = event.type == SDL_KEYDOWN;
+                    break;
+                case SDLK_DOWN:
+                case SDLK_s:
+                    player.keys.isS = event.type == SDL_KEYDOWN;
+                    break;
+                case SDLK_RIGHT:
+                case SDLK_d:
+                    player.keys.isD = event.type == SDL_KEYDOWN;
+                    break;
+                case SDLK_SPACE:
+                    player.keys.isSpace = event.type == SDL_KEYDOWN;
+                    break;
+                case SDLK_r:
+                    resetPos(&player);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            if (event.type == SDL_MOUSEMOTION) {
+                turnPlayer(&player, event.motion.xrel, -event.motion.yrel);
+            }
+
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT && !isHitNull) {
+                level_setTile(&level, hitResult.x, hitResult.y, hitResult.z, 0);
+            }
+
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && !isHitNull) {
+                int x = hitResult.x;
+                int y = hitResult.y;
+                int z = hitResult.z;
+
+                if (hitResult.f == 0) {
+                    y--;
+                }
+
+                if (hitResult.f == 1) {
+                    y++;
+                }
+
+                if (hitResult.f == 2) {
+                    z--;
+                }
+
+                if (hitResult.f == 3) {
+                    z++;
+                }
+
+                if (hitResult.f == 4) {
+                    x--;
+                }
+
+                if (hitResult.f == 5) {
+                    x++;
+                }
+
+                level_setTile(&level, x, y, z, 1);
+            }
+
+            if ((event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN)) {
+                level_save(&level);
             }
         }
 
@@ -253,7 +256,7 @@ int main() {
             tick(&player);
         }
 
-        render(&event, window);
+        render(window);
         frames++;
 
         while (util_getTimeInMs() >= lastTime + 1000) {

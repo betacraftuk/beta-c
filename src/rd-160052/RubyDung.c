@@ -13,7 +13,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <unistd.h>
 #include <SDL2/SDL.h>
 #include <math.h>
 #ifdef __APPLE__
