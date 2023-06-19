@@ -154,13 +154,10 @@ void levelrenderer_renderPick(Level* level, Player* player) {
                         tesselator_init();
                         tile_renderFaceNoTexture(tile, x, y, z, i);
                         tesselator_flush();
-                        glPopName();
                     }
 
                     glPopName();
                 }
-
-                glPopName();
             }
 
             glPopName();
