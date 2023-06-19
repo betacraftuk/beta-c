@@ -83,8 +83,8 @@ void levelrenderer_render(Level* level, Player* player, int layer) {
 }
 
 int levelrenderer_dirtyChunkSorter(const void* a, const void* b) {
-    Chunk* c0 = (Chunk*)a;
-    Chunk* c1 = (Chunk*)b;
+    Chunk* c0 = *(Chunk**)a;
+    Chunk* c1 = *(Chunk**)b;
 
     int i0 = frustum_visibleAABB(&c0->aabb);
     int i1 = frustum_visibleAABB(&c1->aabb);
