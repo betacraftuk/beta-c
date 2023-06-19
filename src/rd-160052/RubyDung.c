@@ -294,7 +294,7 @@ void render(SDL_Event* e, SDL_Window* window) {
     while (cur != NULL) {
         z = cur->data;
 
-        if (entity_isLit(&z->entity) && frustum_visibleAABB(&z->entity.bb)) {
+        if (!entity_isLit(&z->entity) && frustum_visibleAABB(&z->entity.bb)) {
             zombie_render(z, timer.a);
         }
 
@@ -324,7 +324,7 @@ int main() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("%s\n", "Failed to initialize SDL");
         exit(0);
-	}
+    }
 
     SDL_DisplayMode dm;
     SDL_GetCurrentDisplayMode(0, &dm);
@@ -335,7 +335,7 @@ int main() {
     SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetSwapInterval(0);
     SDL_GLContext glcontext = SDL_GL_CreateContext(window);
 
