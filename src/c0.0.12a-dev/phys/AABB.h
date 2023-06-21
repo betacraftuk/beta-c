@@ -23,5 +23,6 @@ void aabb_grow(AABB* aabb, AABB* bb, float xa, float ya, float za);
 float aabb_clipXCollide(AABB* bb, AABB* c, float xa);
 float aabb_clipYCollide(AABB* bb, AABB* c, float ya);
 float aabb_clipZCollide(AABB* bb, AABB* c, float za);
+int aabb_intersects(AABB* source, AABB* c);
 
 #endif

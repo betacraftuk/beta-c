@@ -2,9 +2,9 @@
 
 #include "tile/Tile.h"
 #include "Chunk.h"
-#include "Frustum.h"
+#include "../renderer/Frustum.h"
 #include "../Util.h"
-#include "../Textures.h"
+#include "../renderer/Textures.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -170,13 +170,61 @@ void levelrenderer_renderPick(Level* level, Player* player) {
     glPopName();
 }
 
-void levelrenderer_renderHit(LevelRenderer* renderer, HitResult* h) {
+void levelrenderer_renderHit(Level* level, HitResult* h, int mode, int tileType) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glColor4f(1.0F, 1.0F, 1.0F, (float)sin((double)util_getTimeInMs() / 100.0) * 0.2F + 0.4F);
-    tesselator_init();
-    tile_renderFaceNoTexture(&tile_rock, h->x, h->y, h->z, h->f);
-    tesselator_flush();
+
+    if (mode == 0) {
+        tesselator_init();
+
+        for(int br = 0; br < 6; ++br) {
+            tile_renderFaceNoTexture(&tile_rock, h->x, h->y, h->z, br);
+        }
+
+        tesselator_flush();
+    } else {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        float var10 = (float)sin((double)util_getTimeInMs() / 100.0) * 0.2F + 0.8F;
+        glColor4f(var10, var10, var10, (float)sin((double)util_getTimeInMs() / 200.0) * 0.2F + 0.5F);
+        glEnable(GL_TEXTURE_2D);
+        int id = textures_load("terrain.png", 9728);
+        glBindTexture(GL_TEXTURE_2D, id);
+        int x = h->x;
+        int y = h->y;
+        int z = h->z;
+        if (h->f == 0) {
+            --y;
+        }
+
+        if (h->f == 1) {
+            ++y;
+        }
+
+        if (h->f == 2) {
+            --z;
+        }
+
+        if (h->f == 3) {
+            ++z;
+        }
+
+        if (h->f == 4) {
+            --x;
+        }
+
+        if (h->f == 5) {
+            ++x;
+        }
+
+        tesselator_init();
+        tesselator_instance.noColor = 1;
+        tile_render(&tile_tiles[tileType], level, 0, x, y, z);
+        tile_render(&tile_tiles[tileType], level, 1, x, y, z);
+        tesselator_flush();
+        glDisable(GL_TEXTURE_2D);
+    }
+
     glDisable(GL_BLEND);
 }
 

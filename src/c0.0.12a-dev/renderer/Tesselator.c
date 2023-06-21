@@ -21,37 +21,42 @@ void tesselator_create() {
 }
 
 void tesselator_flush() {
-    if (tesselator_instance.hasTexture && tesselator_instance.hasColor) {
-        glInterleavedArrays(GL_T2F_C3F_V3F, 0, tesselator_instance.buffer);
-    } else if (tesselator_instance.hasTexture) {
-        glInterleavedArrays(GL_T2F_V3F, 0, tesselator_instance.buffer);
-    } else if (tesselator_instance.hasColor) {
-        glInterleavedArrays(GL_C3F_V3F, 0, tesselator_instance.buffer);
-    } else {
-        glInterleavedArrays(GL_V3F, 0, tesselator_instance.buffer);
+    if (tesselator_instance.vertices > 0) {
+        if (tesselator_instance.hasTexture && tesselator_instance.hasColor) {
+            glInterleavedArrays(GL_T2F_C3F_V3F, 0, tesselator_instance.buffer);
+        }
+        else if (tesselator_instance.hasTexture) {
+            glInterleavedArrays(GL_T2F_V3F, 0, tesselator_instance.buffer);
+        }
+        else if (tesselator_instance.hasColor) {
+            glInterleavedArrays(GL_C3F_V3F, 0, tesselator_instance.buffer);
+        }
+        else {
+            glInterleavedArrays(GL_V3F, 0, tesselator_instance.buffer);
+        }
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        if (tesselator_instance.hasTexture) {
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+
+        if (tesselator_instance.hasColor) {
+            glEnableClientState(GL_COLOR_ARRAY);
+        }
+
+        glDrawArrays(GL_QUADS, GL_POINTS, tesselator_instance.vertices);
+        glDisableClientState(GL_VERTEX_ARRAY);
+
+        if (tesselator_instance.hasTexture) {
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+
+        if (tesselator_instance.hasColor) {
+            glDisableClientState(GL_COLOR_ARRAY);
+        }
+
+        tesselator_clear();
     }
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    if (tesselator_instance.hasTexture) {
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
-
-    if (tesselator_instance.hasColor) {
-        glEnableClientState(GL_COLOR_ARRAY);
-    }
-
-    glDrawArrays(GL_QUADS, GL_POINTS, tesselator_instance.vertices);
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-    if (tesselator_instance.hasTexture) {
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
-
-    if (tesselator_instance.hasColor) {
-        glDisableClientState(GL_COLOR_ARRAY);
-    }
-
-    tesselator_clear();
 }
 
 void tesselator_clear() {
@@ -63,6 +68,7 @@ void tesselator_init() {
     tesselator_clear();
     tesselator_instance.hasColor = 0;
     tesselator_instance.hasTexture = 0;
+    tesselator_instance.noColor = 0;
 }
 
 void tesselator_tex(float u, float v) {
@@ -76,14 +82,23 @@ void tesselator_tex(float u, float v) {
 }
 
 void tesselator_color(float r, float g, float b) {
-    if (!tesselator_instance.hasColor) {
-        tesselator_instance.len += 3;
+    if (!tesselator_instance.noColor) {
+        if (!tesselator_instance.hasColor) {
+            tesselator_instance.len += 3;
+        }
     }
 
     tesselator_instance.hasColor = 1;
     tesselator_instance.r = r;
     tesselator_instance.g = g;
     tesselator_instance.b = b;
+}
+
+void tesselator_color_code(int c) {
+    float r = (float)(c >> 16 & 255) / 255.0F;
+    float g = (float)(c >> 8 & 255) / 255.0F;
+    float b = (float)(c & 255) / 255.0F;
+    tesselator_color(r, g, b);
 }
 
 void tesselator_vertexUV(float x, float y, float z, float u, float v) {

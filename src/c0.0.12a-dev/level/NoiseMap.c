@@ -1,14 +1,14 @@
-#include "PerlinNoiseFilter.h"
+#include "NoiseMap.h"
 
 #include <stdlib.h>
 
-void perlinnoisefilter_create(PerlinNoiseFilter* source, int levels) {
+void noisemap_create(NoiseMap* source, int levels) {
     source->levels = levels;
     source->seed = rand();
     source->fuzz = 16;
 }
 
-int* perlinnoisefilter_read(PerlinNoiseFilter* source, int width, int height) {
+int* noisemap_read(NoiseMap* source, int width, int height) {
     int* tmp = malloc(sizeof(int) * (width * height));
     int level = source->levels;
     int result = width >> level;

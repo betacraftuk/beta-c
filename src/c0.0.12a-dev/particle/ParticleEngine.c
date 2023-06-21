@@ -1,6 +1,6 @@
 #include "ParticleEngine.h"
 
-#include "../Textures.h"
+#include "../renderer/Textures.h"
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
@@ -33,6 +33,10 @@ void particleengine_tick(ParticleEngine* pe) {
 }
 
 void particleengine_render(ParticleEngine* pe, Player* player, float a, int layer) {
+    if (pe->particles->size == 0) {
+        return;
+    }
+
     glEnable(GL_TEXTURE_2D);
     int id = textures_load("terrain.png", 9728);
     glBindTexture(GL_TEXTURE_2D, id);

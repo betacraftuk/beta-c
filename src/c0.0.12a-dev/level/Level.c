@@ -1,7 +1,7 @@
 #include "Level.h"
 
 #include "LevelRenderer.h"
-#include "PerlinNoiseFilter.h"
+#include "LevelGen.h"
 #include "tile/Tile.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,73 +28,11 @@ void level_create(Level* level, int w, int h, int d) {
     int mapLoaded = level_load(level);
 
     if (!mapLoaded) {
-        level_generateMap(level);
+        level->blocks = levelgen_generateMap(w, h, d);
     }
 
     level_calcLightDepths(level, 0, 0, w, h);
     levelrenderer_create(&level->renderer, level);
-}
-
-void level_generateMap(Level* level) {
-    int w = level->width;
-    int h = level->height;
-    int d = level->depth;
-    PerlinNoiseFilter p1, p2, p3, p4;
-    perlinnoisefilter_create(&p1, 0);
-    perlinnoisefilter_create(&p2, 0);
-    perlinnoisefilter_create(&p3, 1);
-    perlinnoisefilter_create(&p4, 1);
-
-    int* heightmap1 = perlinnoisefilter_read(&p1, w, h);
-    int* heightmap2 = perlinnoisefilter_read(&p2, w, h);    
-    int* cf = perlinnoisefilter_read(&p3, w, h);
-    int* rockMap = perlinnoisefilter_read(&p4, w, h);
-
-    for (int x = 0; x < w; x++) {
-        for (int y = 0; y < d; y++) {
-            for (int z = 0; z < h; z++) {
-                int dh1 = heightmap1[x + z * level->width];
-                int dh2 = heightmap2[x + z * level->width];
-                int cfh = cf[x + z * level->width];
-
-                if (cfh < 128) {
-                    dh2 = dh1;
-                }
-
-                int dh = dh1;
-                if (dh2 > dh1) {
-                    dh = dh2;
-                }
-
-                dh = dh / 8 + d / 3;
-                int rh = rockMap[x + z * level->width] / 8 + d / 3;
-                if (rh > dh - 2) {
-                    rh = dh - 2;
-                }
-
-                int i = (y * level->height + z) * level->width + x;
-                int id = 0;
-                if (y == dh) {
-                    id = tile_grass.id;
-                }
-
-                if (y < dh) {
-                    id = tile_dirt.id;
-                }
-
-                if (y <= rh) {
-                    id = tile_rock.id;
-                }
-
-                level->blocks[i] = (unsigned char)id;
-            }
-        }
-    }
-
-    free(heightmap1);
-    free(heightmap2);
-    free(cf);
-    free(rockMap);
 }
 
 int level_load(Level* level) {

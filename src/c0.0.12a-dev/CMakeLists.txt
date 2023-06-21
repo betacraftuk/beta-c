@@ -1,31 +1,31 @@
 project(c0.0.12a-dev)
 
 add_executable(c0.0.12a-dev
-	RubyDung.c
+	Minecraft.c
 	Player.c 
 	Player.h
 	phys/AABB.c
 	phys/AABB.h
 	level/Chunk.c
 	level/Chunk.h
-	level/Frustum.c
-	level/Frustum.h
+	renderer/Frustum.c
+	renderer/Frustum.h
 	level/Level.c
 	level/Level.h
 	level/LevelRenderer.c
 	level/LevelRenderer.h
-	level/Tesselator.c
-	level/Tesselator.h
-	level/PerlinNoiseFilter.c
-	level/PerlinNoiseFilter.h
+	renderer/Tesselator.c
+	renderer/Tesselator.h
+	level/NoiseMap.c
+	level/NoiseMap.h
 	level/tile/Tile.c
 	level/tile/Tile.h
 	level/tile/GrassTile.c
 	level/tile/GrassTile.h
 	HitResult.c
 	HitResult.h
-	Textures.c
-	Textures.h
+	renderer/Textures.c
+	renderer/Textures.h
 	Timer.c
 	Timer.h
 	Util.c 
@@ -50,4 +50,8 @@ add_executable(c0.0.12a-dev
 	particle/ParticleEngine.h
 	level/tile/Bush.c
 	level/tile/Bush.h
+	gui/Font.c
+	gui/Font.h
+	level/LevelGen.c
+	level/LevelGen.h
 )

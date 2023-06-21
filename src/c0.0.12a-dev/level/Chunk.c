@@ -1,7 +1,7 @@
 #include "Chunk.h"
 
 #include "../Util.h"
-#include "../Textures.h"
+#include "../renderer/Textures.h"
 #include "tile/Tile.h"
 #include <stdlib.h>
 #ifdef __APPLE__

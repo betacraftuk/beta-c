@@ -1,14 +1,15 @@
 #define SDL_MAIN_HANDLED
 
 #include "Util.h"
+#include "gui/Font.h"
 #include "character/Zombie.h"
 #include "level/Chunk.h"
 #include "level/Level.h"
 #include "level/LevelRenderer.h"
-#include "level/Frustum.h"
+#include "renderer/Frustum.h"
 #include "level/tile/Tile.h"
 #include "particle/ParticleEngine.h"
-#include "Textures.h"
+#include "renderer/Textures.h"
 #include "Timer.h"
 
 #include <stdio.h>
@@ -29,8 +30,9 @@
 
 void setupFog(int i);
 
-int width = 1024;
-int height = 768;
+int fullscreen = 0;
+int width = 854;
+int height = 480;
 float fogColor0[4];
 float fogColor1[4];
 Timer timer;
@@ -38,12 +40,28 @@ Level level;
 Player player;
 int paintTexture = 1;
 ParticleEngine particleEngine;
-LinkedList* zombies;
+LinkedList* entities;
+int pause = 0;
+int yMouseAxis = 1;
+int mouseGrabbed = 0;
+Font font;
+int editMode = 0;
+char fpsString[128] = "";
 int viewportBuffer[16];
 int selectBuffer[2000];
 HitResult hitResult;
 int isHitNull = 1;
 float lb[16];
+
+void checkGlError(const char* string) {
+    int errorCode = glGetError();
+
+    if (errorCode != 0) {
+        const char* errorString = gluErrorString(errorCode);
+        printf("########## GL ERROR ##########\n @ %s\n %d: %s\n", string, errorCode, errorString);
+        exit(0);
+    }
+}
 
 void init() {
     fogColor0[0] = (float)((COL0 >> 16 & 255) / 255.0F);
@@ -54,6 +72,8 @@ void init() {
     fogColor1[1] = (float)((COL1 >> 8 & 255) / 255.0F);
     fogColor1[2] = (float)((COL1 & 255) / 255.0F);
     fogColor1[3] = 1.0F;
+
+    checkGlError("Pre startup");
     glEnable(GL_TEXTURE_2D);
     glShadeModel(GL_SMOOTH);
     glClearColor(0.5, 0.8, 1.0, 0.0);
@@ -61,10 +81,12 @@ void init() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.5F);
+    glAlphaFunc(GL_GREATER, 0.0F);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
+
+    checkGlError("Startup");
 
     createTimer(&timer, 20.0f);
     tesselator_create();
@@ -72,21 +94,24 @@ void init() {
     level_create(&level, 256, 256, 64);
     player_create(&player, &level);
     particleengine_create(&particleEngine, &level);
-    zombies = util_linkedlist_create();
+    font_create(&font, "default.gif");
+    entities = util_linkedlist_create();
 
     for (int i = 0; i < 10; i++) {
         Zombie* z = malloc(sizeof(Zombie));
         zombie_create(z, &level, 128.0F, 0.0F, 128.0F);
         entity_resetPos(&z->entity);
-        util_linkedlist_add(zombies, z);
+        util_linkedlist_add(entities, z);
     }
+
+    checkGlError("Post startup");
 }
 
 void tick() {
     level_tick(&level);
     particleengine_tick(&particleEngine);
 
-    Node* cur = zombies->head;
+    Node* cur = entities->head;
     Zombie* z;
 
     while (cur != NULL) {
@@ -95,7 +120,7 @@ void tick() {
         zombie_tick(z);
 
         if (z->entity.removed) {
-            util_linkedlist_remove_node(zombies, cur);
+            util_linkedlist_remove_node(entities, cur);
         }
 
         cur = nextNode;
@@ -183,6 +208,7 @@ void drawGui() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0F, 0.0F, -200.0F);
+    checkGlError("GUI: Init");
     glPushMatrix();
     glTranslatef((float)(screenWidth - 16), 16.0F, 0.0F);
     glScalef(16.0F, 16.0F, 16.0F);
@@ -197,6 +223,10 @@ void drawGui() {
     tesselator_flush();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
+    checkGlError("GUI: Draw selected");
+    font_drawShadow(&font, "0.0.11a", 2, 2, 16777215);
+    font_drawShadow(&font, fpsString, 2, 12, 16777215);
+    checkGlError("GUI: Draw text");
     int wc = screenWidth / 2;
     int hc = screenHeight / 2;
     glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -210,6 +240,7 @@ void drawGui() {
     tesselator_vertex(wc - 4, hc + 1, 0.0F);
     tesselator_vertex(wc + 5, hc + 1, 0.0F);
     tesselator_flush();
+    checkGlError("GUI: Draw crosshair");
 }
 
 void setBuffer(float a, float b, float c, float d) {
@@ -220,18 +251,29 @@ void setBuffer(float a, float b, float c, float d) {
 }
 
 void render(SDL_Window* window) {
-    pick(timer.a);
+    int flags = SDL_GetWindowFlags(window);
 
+    if (flags & SDL_WINDOW_SHOWN) { // SDL_WINDOW_MOUSE_FOCUS SDL_WINDOW_INPUT_GRABBED SDL_WINDOW_INPUT_FOCUS
+        SDL_SetRelativeMouseMode(1);
+        mouseGrabbed = 1;
+    }
+
+    glViewport(0, 0, width, height);
+    checkGlError("Set viewport");
+    pick(timer.a);
+    checkGlError("Picked");
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     setupCamera(timer.a);
     glEnable(GL_CULL_FACE);
     levelrenderer_updateDirtyChunks(&level, &player);
+    checkGlError("Update chunks");
     setupFog(0);
     glEnable(GL_FOG);
     levelrenderer_render(&level, &player, 0);
+    checkGlError("Rendered level");
 
     Zombie* z;
-    Node* cur = zombies->head;
+    Node* cur = entities->head;
 
     while (cur != NULL) {
         z = cur->data;
@@ -243,11 +285,13 @@ void render(SDL_Window* window) {
         cur = cur->next;
     }
 
+    checkGlError("Rendered entities");
     particleengine_render(&particleEngine, &player, timer.a, 0);
+    checkGlError("Rendered particles");
     setupFog(1);
     levelrenderer_render(&level, &player, 1);
 
-    cur = zombies->head;
+    cur = entities->head;
     while (cur != NULL) {
         z = cur->data;
 
@@ -262,21 +306,90 @@ void render(SDL_Window* window) {
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_FOG);
+    checkGlError("Rendered rest");
 
     if (!isHitNull) {
         glDisable(GL_ALPHA_TEST);
-        levelrenderer_renderHit(&level.renderer, &hitResult);
+        levelrenderer_renderHit(&level, &hitResult, editMode, paintTexture);
         glEnable(GL_ALPHA_TEST);
     }
 
+    checkGlError("Rendered hit");
     drawGui();
+    checkGlError("Rendered gui");
     SDL_GL_SwapWindow(window);
 }
 
 void spawnZombie() {
     Zombie* z = malloc(sizeof(Zombie));
     zombie_create(z, &level, player.entity.x, player.entity.y, player.entity.z);
-    util_linkedlist_add(zombies, z);
+    util_linkedlist_add(entities, z);
+}
+
+int isFree(AABB* aabb) {
+    player_tick(&player);
+    if (aabb_intersects(&player.entity.bb, aabb)) {
+        return 0;
+    } else {
+        Node* cur = entities->head;
+        Zombie* z;
+
+        while (cur != NULL) {
+            z = (Zombie*)cur->data;
+
+            if (aabb_intersects(&z->entity.bb, aabb)) {
+                return 0;
+            }
+
+            cur = cur->next;
+        }
+
+        return 1;
+    }
+}
+
+void handleMouseClick() {
+    if (!editMode) {
+        if (!isHitNull) {
+            Tile* x = &tile_tiles[level_getTile(&level, hitResult.x, hitResult.y, hitResult.z)];
+            int y = level_setTile(&level, hitResult.x, hitResult.y, hitResult.z, 0);
+
+            if (!x->isNull && y) {
+                tile_destroy(x, &level, hitResult.x, hitResult.y, hitResult.z, &particleEngine);
+            }
+        }
+    } else if (!isHitNull) {
+        int var5 = hitResult.x;
+        int var6 = hitResult.y;
+        int z = hitResult.z;
+
+        if (hitResult.f == 0) {
+            --var6;
+        }
+        if (hitResult.f == 1) {
+            ++var6;
+        }
+        if (hitResult.f == 2) {
+            --z;
+        }
+        if (hitResult.f == 3) {
+            ++z;
+        }
+        if (hitResult.f == 4) {
+            --var5;
+        }
+        if (hitResult.f == 5) {
+            ++var5;
+        }
+
+        Tile* tileAABB = &tile_tiles[paintTexture];
+        AABB aabb;
+        tile_getAABB(tileAABB, &aabb, var5, var6, z);
+
+        if (aabb.isNull || isFree(&aabb)) {
+            level_setTile(&level, var5, var6, z, paintTexture);
+        }
+    }
 }
 
 int main() { 
@@ -286,7 +399,7 @@ int main() {
     }
 
     SDL_WindowFlags flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
-    SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+    SDL_Window* window = SDL_CreateWindow("Minecraft 0.0.11a", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -301,15 +414,19 @@ int main() {
     uint64_t lastTime = util_getTimeInMs();
     int frames = 0;
 
-    int die = 0;
+    int running = 1;
 
-    while (!die) {
+    while (running) {
         SDL_Event event;
 
         while (SDL_PollEvent(&event)) {
+            if (pause) {
+                SDL_Delay(100L);
+                continue;
+            }
 
-            if ((event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) || event.type == SDL_QUIT)
-                die = 1;
+            if (event.type == SDL_QUIT)
+                running = 0;
 
             if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
                 switch (event.key.keysym.sym)
@@ -340,6 +457,10 @@ int main() {
             
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
+                case SDLK_ESCAPE:
+                    SDL_SetRelativeMouseMode(0);
+                    mouseGrabbed = 0;
+                    break;
                 case SDLK_r:
                     entity_resetPos(&player.entity);
                     break;
@@ -361,6 +482,9 @@ int main() {
                 case SDLK_6:
                     paintTexture = 6;
                     break;
+                case SDLK_y:
+                    yMouseAxis *= -1;
+                    break;
                 case SDLK_g:
                     spawnZombie();
                     break;
@@ -370,48 +494,20 @@ int main() {
             }
 
             if (event.type == SDL_MOUSEMOTION) {
+                if (!mouseGrabbed) {
+                    SDL_SetRelativeMouseMode(1);
+                    mouseGrabbed = 1;
+                }
+
                 entity_turn(&player.entity, event.motion.xrel, -event.motion.yrel);
             }
 
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT && !isHitNull) {
-                Tile* frustum = &tile_tiles[level_getTile(&level, hitResult.x, hitResult.y, hitResult.z)];
-                int i = level_setTile(&level, hitResult.x, hitResult.y, hitResult.z, 0);
-
-                if (!frustum->isNull && i) {
-                    tile_destroy(frustum, &level, hitResult.x, hitResult.y, hitResult.z, &particleEngine);
-                }
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                handleMouseClick();
             }
 
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && !isHitNull) {
-                int x = hitResult.x;
-                int y = hitResult.y;
-                int z = hitResult.z;
-
-                if (hitResult.f == 0) {
-                    y--;
-                }
-
-                if (hitResult.f == 1) {
-                    y++;
-                }
-
-                if (hitResult.f == 2) {
-                    z--;
-                }
-
-                if (hitResult.f == 3) {
-                    z++;
-                }
-
-                if (hitResult.f == 4) {
-                    x--;
-                }
-
-                if (hitResult.f == 5) {
-                    x++;
-                }
-
-                level_setTile(&level, x, y, z, paintTexture);
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
+                editMode = (editMode + 1) % 2;
             }
         }
 
@@ -421,11 +517,13 @@ int main() {
             tick();
         }
 
+        checkGlError("Pre render");
         render(window);
+        checkGlError("Post render");
         frames++;
 
         while (util_getTimeInMs() >= lastTime + 1000) {
-            printf("%d fps, %d\n", frames, chunk_updates);
+            snprintf(fpsString, sizeof(fpsString), "%d fps, %d chunk updates", frames, chunk_updates);
           
             chunk_updates = 0;
             lastTime += 1000L;
@@ -442,7 +540,7 @@ int main() {
     free(level.renderer.chunks);
     free(level.blocks);
     free(level.lightDepths);
-    util_linkedlist_free(zombies);
+    util_linkedlist_free(entities);
     util_linkedlist_free(particleEngine.particles);
 
     return 0;

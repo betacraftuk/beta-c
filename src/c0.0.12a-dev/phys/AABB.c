@@ -137,6 +137,10 @@ float aabb_clipZCollide(AABB* bb, AABB* c, float za) {
     }
 }
 
+int aabb_intersects(AABB* source, AABB* c) {
+    return c->x1 > source->x0 && c->x0 < source->x1 ? (c->y1 > source->y0 && c->y0 < source->y1 ? c->z1 > source->z0 && c->z0 < source->z1 : 0) : 0;
+}
+
 void aabb_move(AABB* aabb, float xa, float ya, float za) {
     aabb->x0 += xa;
     aabb->y0 += ya;

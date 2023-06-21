@@ -13,6 +13,7 @@ typedef struct Tesselator {
 	int hasTexture;
     int len;
     int p;
+    int noColor;
 } Tesselator;
 
 extern Tesselator tesselator_instance;
@@ -25,5 +26,6 @@ void tesselator_tex(float u, float v);
 void tesselator_color(float r, float g, float b);
 void tesselator_vertex(float x, float y, float z);
 void tesselator_vertexUV(float x, float y, float z, float u, float v);
+void tesselator_color_code(int c);
 
 #endif

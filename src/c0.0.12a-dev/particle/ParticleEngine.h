@@ -1,7 +1,7 @@
 #ifndef PARTICLEENGINE_H
 #define PARTICLEENGINE_H
 
-#include "Particle.h"
+#include "../particle/Particle.h"
 #include "../Util.h"
 #include "../Player.h"
 

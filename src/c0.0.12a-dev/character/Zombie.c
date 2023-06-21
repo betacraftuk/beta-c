@@ -1,7 +1,7 @@
 #include "Zombie.h"
 
 #include "../Util.h"
-#include "../Textures.h"
+#include "../renderer/Textures.h"
 #include <math.h>
 
 #ifdef __APPLE__

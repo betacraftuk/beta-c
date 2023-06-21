@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "Tesselator.h"
+#include "../renderer/Tesselator.h"
 #include "../phys/AABB.h"
 
 typedef struct Chunk {
