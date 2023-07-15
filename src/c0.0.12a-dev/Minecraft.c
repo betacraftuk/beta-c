@@ -43,7 +43,7 @@ ParticleEngine particleEngine;
 LinkedList* entities;
 int pause = 0;
 int yMouseAxis = 1;
-int mouseGrabbed = 0;
+int mouseGrabbed = 1;
 Font font;
 int editMode = 0;
 char fpsString[128] = "";
@@ -251,13 +251,6 @@ void setBuffer(float a, float b, float c, float d) {
 }
 
 void render(SDL_Window* window) {
-    int flags = SDL_GetWindowFlags(window);
-
-    if (flags & SDL_WINDOW_SHOWN) { // SDL_WINDOW_MOUSE_FOCUS SDL_WINDOW_INPUT_GRABBED SDL_WINDOW_INPUT_FOCUS
-        SDL_SetRelativeMouseMode(1);
-        mouseGrabbed = 1;
-    }
-
     glViewport(0, 0, width, height);
     checkGlError("Set viewport");
     pick(timer.a);
@@ -404,6 +397,7 @@ int main() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetSwapInterval(0);
+    SDL_SetRelativeMouseMode(1);
     SDL_GLContext glcontext = SDL_GL_CreateContext(window);
 
     init();
@@ -458,7 +452,11 @@ int main() {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                 case SDLK_ESCAPE:
+                    if (!mouseGrabbed)
+                        break;
+
                     SDL_SetRelativeMouseMode(0);
+                    SDL_WarpMouseInWindow(window, width / 2, height / 2);
                     mouseGrabbed = 0;
                     break;
                 case SDLK_r:
@@ -493,21 +491,23 @@ int main() {
                 }
             }
 
-            if (event.type == SDL_MOUSEMOTION) {
-                if (!mouseGrabbed) {
+            if (mouseGrabbed) {
+                if (event.type == SDL_MOUSEMOTION) {
+                    entity_turn(&player.entity, event.motion.xrel, -event.motion.yrel);
+                }
+
+                if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                    handleMouseClick();
+                }
+
+                if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
+                    editMode = (editMode + 1) % 2;
+                }
+            } else {
+                if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP) {
                     SDL_SetRelativeMouseMode(1);
                     mouseGrabbed = 1;
                 }
-
-                entity_turn(&player.entity, event.motion.xrel, -event.motion.yrel);
-            }
-
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                handleMouseClick();
-            }
-
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
-                editMode = (editMode + 1) % 2;
             }
         }
 
