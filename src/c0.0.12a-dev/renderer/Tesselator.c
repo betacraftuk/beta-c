@@ -10,8 +10,6 @@
 
 Tesselator tesselator_instance;
 
-void tesselator_clear();
-
 void tesselator_create() {
     tesselator_instance.vertices = 0;
 	tesselator_instance.hasColor = 0;
