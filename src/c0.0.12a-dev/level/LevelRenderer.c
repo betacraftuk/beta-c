@@ -173,12 +173,12 @@ void levelrenderer_renderPick(Level* level, Player* player) {
 void levelrenderer_renderHit(Level* level, HitResult* h, int mode, int tileType) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glColor4f(1.0F, 1.0F, 1.0F, (float)sin((double)util_getTimeInMs() / 100.0) * 0.2F + 0.4F);
+    glColor4f(1.0F, 1.0F, 1.0F, ((float)sin((double)util_getTimeInMs() / 100.0) * 0.2F + 0.4F) * 0.5F);
 
     if (mode == 0) {
         tesselator_init();
 
-        for(int br = 0; br < 6; ++br) {
+        for (int br = 0; br < 6; br++) {
             tile_renderFaceNoTexture(&tile_rock, h->x, h->y, h->z, br);
         }
 
@@ -193,28 +193,29 @@ void levelrenderer_renderHit(Level* level, HitResult* h, int mode, int tileType)
         int x = h->x;
         int y = h->y;
         int z = h->z;
+
         if (h->f == 0) {
-            --y;
+            y--;
         }
 
         if (h->f == 1) {
-            ++y;
+            y++;
         }
 
         if (h->f == 2) {
-            --z;
+            z--;
         }
 
         if (h->f == 3) {
-            ++z;
+            z++;
         }
 
         if (h->f == 4) {
-            --x;
+            x--;
         }
 
         if (h->f == 5) {
-            ++x;
+            x++;
         }
 
         tesselator_init();

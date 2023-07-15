@@ -136,7 +136,7 @@ void tile_renderFace(Tile* tile, int x, int y, int z, int face) {
         tesselator_vertexUV(x0, y0, z1, u1, v1);
     }
 
-    if(face == 5) {
+    if (face == 5) {
         tesselator_vertexUV(x1, y0, z1, u0, v1);
         tesselator_vertexUV(x1, y0, z0, u1, v1);
         tesselator_vertexUV(x1, y1, z0, u1, v0);
