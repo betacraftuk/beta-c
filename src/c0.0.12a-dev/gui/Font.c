@@ -20,31 +20,35 @@ void font_create(Font* font, const char* name) {
         exit(1);
     }
 
-    //for(int i = 0; i < 128; ++i) {
-    //    int xt = i % 16;
-    //    int yt = i / 16;
-    //    int x = 0;
+    for (int i = 0; i < 128; i++) {
+        int xt = i % 16;
+        int yt = i / 16;
+        int x = 0;
 
-    //    for (int emptyColumn = 0; x < 8 && !emptyColumn; ++x) {
-    //        int xPixel = xt * 8 + x;
-    //        emptyColumn = 1;
+        for (int emptyColumn = 0; x < 8 && !emptyColumn; x++) {
+            int xPixel = xt * 8 + x;
+            emptyColumn = 1;
 
-    //        for (int y = 0; y < 8 && emptyColumn; ++y) {
-    //            int yPixel = (yt * 8 + y) * image->w;
-    //            int pixel = (Uint32)image->pixels[xPixel + yPixel] & 255;
+            for (int y = 0; y < 8 && emptyColumn; y++) {
+                int yPixel = (yt * 8 + y) * image->w;
 
-    //            if (pixel > 128) {
-    //                emptyColumn = 0;
-    //            }
-    //        }
-    //    }
+                SDL_LockSurface(image);
+                Uint32* pixels = (Uint32*)image->pixels;
+                //Uint32 pixel = pixels[xPixel + yPixel] & 255; // error
+                SDL_UnlockSurface(image);
 
-    //    if (i == 32) {
-    //        x = 4;
-    //    }
+                //if (pixel > 128) {
+                //    emptyColumn = 0;
+                //}
+            }
+        }
 
-    //    font->charWidths[i] = x;
-    //}
+        if (i == 32) {
+            x = 4;
+        }
+
+        font->charWidths[i] = x;
+    }
 
     font->fontTexture = textures_load(name, 9728);
     SDL_FreeSurface(image);
