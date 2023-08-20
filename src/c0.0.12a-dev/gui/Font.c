@@ -15,10 +15,12 @@
 
 void font_create(Font* font, const char* name) {
     SDL_Surface* image = IMG_Load(name);
-    
+
     if (image == NULL) {
         exit(1);
     }
+
+    Uint8* pixels = (Uint8*)image->pixels;
 
     for (int i = 0; i < 128; i++) {
         int xt = i % 16;
@@ -31,15 +33,11 @@ void font_create(Font* font, const char* name) {
 
             for (int y = 0; y < 8 && emptyColumn; y++) {
                 int yPixel = (yt * 8 + y) * image->w;
+                Uint8 pixel = pixels[xPixel + yPixel] & 255;
 
-                SDL_LockSurface(image);
-                Uint32* pixels = (Uint32*)image->pixels;
-                //Uint32 pixel = pixels[xPixel + yPixel] & 255; // error
-                SDL_UnlockSurface(image);
-
-                //if (pixel > 128) {
-                //    emptyColumn = 0;
-                //}
+                if (pixel > 128) {
+                    emptyColumn = 0;
+                }
             }
         }
 
