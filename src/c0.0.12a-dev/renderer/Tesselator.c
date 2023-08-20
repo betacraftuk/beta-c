@@ -84,12 +84,12 @@ void tesselator_color(float r, float g, float b) {
         if (!tesselator_instance.hasColor) {
             tesselator_instance.len += 3;
         }
-    }
 
-    tesselator_instance.hasColor = 1;
-    tesselator_instance.r = r;
-    tesselator_instance.g = g;
-    tesselator_instance.b = b;
+        tesselator_instance.hasColor = 1;
+        tesselator_instance.r = r;
+        tesselator_instance.g = g;
+        tesselator_instance.b = b;
+    }
 }
 
 void tesselator_color_code(int c) {
